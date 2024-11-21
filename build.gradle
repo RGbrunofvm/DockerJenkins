@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Selenium WebDriver
+    testImplementation 'org.seleniumhq.selenium:selenium-java:4.14.0'
+
+    // TestNG
+    testImplementation 'org.testng:testng:7.8.0'
+
+    // WebDriverManager
+    implementation 'io.github.bonigarcia:webdrivermanager:5.5.3'
+}
+
+test {
+    useTestNG {
+        suites 'src/test/resources/testng.xml' // Ruta al archivo TestNG XML
+    }
+}
