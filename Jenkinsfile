@@ -55,34 +55,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        always {
-            script {
-                echo 'Publishing test reports if available...'
-
-                def reportsExist = fileExists('build/test-results/test')
-                if (reportsExist) {
-                    junit 'build/test-results/test/*.xml'
-                    publishHTML(target: [
-                        allowMissing: false,
-                        keepAll: true,
-                        reportDir: 'build/reports/tests/test',
-                        reportFiles: 'index.html',
-                        reportName: 'Test Report'
-                    ])
-                } else {
-                    echo "No test reports found to publish."
-                }
-            }
-        }
-
-        failure {
-            echo 'Pipeline failed. Please check the logs for details.'
-        }
-
-        success {
-            echo 'Pipeline executed successfully!'
-        }
-    }
 }
