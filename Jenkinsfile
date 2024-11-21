@@ -2,11 +2,6 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Repository') {
-            steps {
-                git url: 'https://github.com/RGbrunofvm/DockerJenkins.git', branch: 'main', credentialsId: 'your-credentials-id'
-            }
-        }
 
         stage('Start Selenium Grid') {
             steps {
