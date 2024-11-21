@@ -5,19 +5,19 @@ pipeline {
 
         stage('Start Selenium Grid') {
             steps {
-                sh 'docker-compose up -d'
+                bat 'docker-compose up -d'
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh './gradlew clean test'
+                bat './gradlew clean test'
             }
         }
 
         stage('Stop Selenium Grid') {
             steps {
-                sh 'docker-compose down'
+                bat 'docker-compose down'
             }
         }
     }
