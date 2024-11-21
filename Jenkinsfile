@@ -4,7 +4,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
-                git url: 'https://github.com/RGbrunofvm/JenkinsDocker.git', branch: 'main', credentialsId: 'your-credentials-id'
+                git url: 'https://github.com/RGbrunofvm/DockerJenkins.git', branch: 'main', credentialsId: 'your-credentials-id'
             }
         }
 
