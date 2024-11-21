@@ -3,14 +3,36 @@ pipeline {
 
     stages {
 
+        stage('Clean Existing Containers') {
+            steps {
+                script {
+                    echo 'Removing any existing containers with the name selenium-hub...'
+                    // Forzar la eliminación del contenedor conflictivo si existe
+                    bat 'docker rm -f selenium-hub || echo "No existing selenium-hub container to remove."'
+                }
+            }
+        }
+
         stage('Start Selenium Grid') {
             steps {
                 script {
-                    // Detiene cualquier contenedor previo que pueda estar en conflicto
-                    bat 'docker-compose down || echo "No containers to stop"'
+                    echo 'Stopping any existing containers to avoid conflicts...'
+                    bat 'docker-compose down || echo "No containers to stop."'
 
-                    // Inicia Selenium Grid
+                    echo 'Starting Selenium Grid containers...'
                     bat 'docker-compose up -d'
+                }
+            }
+        }
+
+        stage('Verify Selenium Grid') {
+            steps {
+                script {
+                    echo 'Checking if Selenium Grid is running...'
+                    def seleniumHubRunning = bat(returnStatus: true, script: 'docker ps -q --filter "name=selenium-hub"') == 0
+                    if (!seleniumHubRunning) {
+                        error("Selenium Grid is not running. Aborting pipeline.")
+                    }
                 }
             }
         }
@@ -18,12 +40,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Verificar si los contenedores están ejecutándose antes de ejecutar pruebas
-                    def seleniumHubRunning = bat(returnStatus: true, script: 'docker ps -q --filter "name=selenium-hub"') == 0
-                    if (!seleniumHubRunning) {
-                        error("Selenium Grid is not running. Aborting tests.")
-                    }
-                    // Ejecutar pruebas
+                    echo 'Running tests with Gradle...'
                     bat './gradlew clean test'
                 }
             }
@@ -32,7 +49,7 @@ pipeline {
         stage('Stop Selenium Grid') {
             steps {
                 script {
-                    // Detener Selenium Grid al finalizar
+                    echo 'Stopping Selenium Grid containers...'
                     bat 'docker-compose down'
                 }
             }
@@ -42,10 +59,11 @@ pipeline {
     post {
         always {
             script {
-                // Asegurarse de que existan los reportes antes de procesarlos
+                echo 'Publishing test reports if available...'
+
                 def reportsExist = fileExists('build/test-results/test')
                 if (reportsExist) {
-                    junit 'build/test-results/test/*.xml' // Publicar reportes de JUnit
+                    junit 'build/test-results/test/*.xml'
                     publishHTML(target: [
                         allowMissing: false,
                         keepAll: true,
@@ -60,11 +78,11 @@ pipeline {
         }
 
         failure {
-            echo 'Pipeline failed. Check logs for more details.'
+            echo 'Pipeline failed. Please check the logs for details.'
         }
 
         success {
-            echo 'Pipeline executed successfully.'
+            echo 'Pipeline executed successfully!'
         }
     }
 }
